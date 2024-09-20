@@ -58,16 +58,16 @@ Before running the Python file or if you encounter the "Your VirusTotal API key 
 
 ## Required Tools
 
-print(f"[**Dnsbruter:**](https://github.com/RevoltSecurities/Dnsbruter) Dnsbruter is a DNS brute-forcing tool. *(required)*")
-print(f"[**Subdominator:**](https://github.com/RevoltSecurities/Subdominator) Subdominator is a subdomain enumeration tool. *(required)*")
-print(f"[**Subfinder:**](https://github.com/projectdiscovery/subfinder) Subfinder is a tool for discovering subdomains. *(required)*")
-print(f"[**Assetfinder:**](https://github.com/tomnomnom/assetfinder) Assetfinder helps find assets associated with a domain. *(required)*")
-print(f"[**Chaos:**](https://github.com/projectdiscovery/chaos) Chaos is a tool for managing subdomain data. *(required)*")
-print(f"[**Findomain:**](https://github.com/Findomain/Findomain) Findomain is a subdomain discovery tool. *(required)*")
-print(f"[**Sublist3r:**](https://github.com/aboehme/Sublist3r) Sublist3r is a fast subdomain enumeration tool. *(required)*")
-print(f"[**TraceNinja:**](https://github.com/mohdh34m/TraceNinja) TraceNinja is a subdomain enumeration tool. *(required)*")
-print(f"[**JQ:**](https://stedolan.github.io/jq/) JQ is a lightweight and flexible command-line JSON processor. *(optional)*")
-print(f"[**Anew:**](https://github.com/tomnomnom/anew) Anew is a tool for deduplicating results. *(optional)*")
+- [**Dnsbruter:**](https://github.com/RevoltSecurities/Dnsbruter) DNS brute-forcing tool. *(required)*
+- [**Subdominator:**](https://github.com/RevoltSecurities/Subdominator) Subdomain enumeration tool. *(required)*
+- [**Subfinder:**](https://github.com/projectdiscovery/subfinder) Discovers subdomains from passive sources. *(required)*
+- [**Assetfinder:**](https://github.com/tomnomnom/assetfinder) Finds subdomains for a specified domain. *(required)*
+- [**Chaos:**](https://github.com/projectdiscovery/chaos) Manages subdomain data. *(required)*
+- [**Findomain:**](https://github.com/Findomain/Findomain) Subdomain discovery tool. *(required)*
+- [**Sublist3r:**](https://github.com/aboehme/Sublist3r) Fast subdomain enumeration tool. *(required)*
+- [**TraceNinja:**](https://github.com/mohdh34m/TraceNinja) Subdomain enumeration tool. *(required)*
+- [**JQ:**](https://stedolan.github.io/jq/) Lightweight command-line JSON processor. *(optional)*
+- [**Anew:**](https://github.com/tomnomnom/anew) Tool for deduplicating results. *(optional)*
 
 
 ## 🔗 Links
