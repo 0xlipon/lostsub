@@ -78,6 +78,10 @@ def gather_subdomains(domain):
     
     for cmd, description in commands: # Use commands here instead of retry_commands
         run_command(cmd, description)
+    for command, description in commands:
+        print(description)  # Print the description of the command
+        os.system(command)  # Execute the command
+        time.sleep(3)  # Sleep for 3 seconds
 
 def filter_unique_subdomains(input_file, output_file):
     """Filter unique subdomains from the input file."""
