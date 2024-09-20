@@ -49,12 +49,11 @@ def gather_subdomains(domain):
         sys.exit(1)  # Exit the program
         
     commands = [
-	(f'subdominator -d {domain} -o output-subdominator.txt', "Collecting subdomains with Subdominator"),
+	(f'subdominator -d {domain} -o subdominator', "Collecting subdomains with Subdominator"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://crt.sh/?q=%25.{domain}&output=json" | jq -r 'if type=="array" then . else empty end' | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u | anew crt''', "Collecting subdomains from crt.sh"),
         (f'''curl --socks5 127.0.0.1:9050 -s --request GET --url 'https://api.securitytrails.com/v1/domain/{domain}/subdomains?children_only=true&include_inactive=false' --header 'APIKEY: WGPKBLH-RODuVKrhDQ8WPb2HSgrKfaa8' --header 'accept: application/json' | jq -r '.subdomains[] | . + ".{domain}"' | anew securitytrails''', "Collecting subdomains from SecurityTrails"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://www.virustotal.com/api/v3/domains/{domain}/subdomains" -H "x-apikey: {VT_API_KEY}" | jq -r '.data[]?.attributes?.last_https_certificate?.extensions?.subject_alternative_name[]? // empty' | sort -u | anew virustotal''', "Collecting subdomains from VirusTotal"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.certspotter.com/v1/issuances?domain={domain}&include_subdomains=true&expand=dns_names" | jq -r '.[].dns_names[]' | sort -u | anew certspotter''', "Collecting subdomains from CertSpotter API"),
-        (f'''curl --socks5 127.0.0.1:9050 -s "http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=text&fl=original&collapse=urlkey" | sed -e 's_https*://__' -e 's/\\/.*//' | sort -u | anew webarchive''', "Collecting subdomains from Web Archive"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://jldc.me/anubis/subdomains/{domain}" | grep -Po '((http|https):\\/\\/)?([\\w.-]+\\.[\\w]+\\.[A-z]+)' | sort -u | anew jldc''', "Collecting subdomains from JLDC API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.hackertarget.com/hostsearch/?q={domain}" | awk -F',' '{{print $1}}' | anew hackertarget''', "Collecting subdomains from HackerTarget API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://otx.alienvault.com/api/v1/indicators/domain/tesla.com/url_list?limit=10000000000000000000000000000000000000000000000000000000000000000&page=1" | grep -o '"hostname": *"[^"]*' | sed 's/"hostname": "//' | sort -u | anew alienvault''', "Collecting subdomains from AlienVault API"),
@@ -70,9 +69,9 @@ def gather_subdomains(domain):
 	(f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
         (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
         (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
-	(f'chaos -d {domain} -silent -o chaos.txt', "Collecting subdomains from Chaos"),
-	(f'findomain -t {domain} -u -e', "Collecting subdomains from Findomain"),
-	(f'sublist3r -d {domain} -o sublist3r.txt', "Collecting subdomains with Sublist3r"),
+	(f'chaos -d {domain} -silent -o chaosdata', "Collecting subdomains from Chaos"),
+	(f'findomain -t {domain} -u -e > findomain_out', "Collecting subdomains from Findomain"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=text&fl=original&collapse=urlkey" | sed -e 's_https*://__' -e 's/\\/.*//' | sort -u | anew webarchive''', "Collecting subdomains from Web Archive"),
 	(f'dnsbruter -d {domain} -w subs-dnsbruter-small.txt -c 200 -wt 100 -o dnsbrute.txt -ws wild.txt', "Collecting subdomains with DNSBruter")
     ]
     
