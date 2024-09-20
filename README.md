@@ -45,7 +45,7 @@ You can run lostsub with the following command:
 
 ## Important Note
 
-Before running the Python file or if you encounter the "Your VirusTotal API key is missing." error, please edit the `lostsub.py` file by following these steps:
+If you encounter "Your VirusTotal API key is missing," edit the lostsub.py file as follows:
 
 1. Open the `lostsub.py` file.
 2. Locate the following line:
