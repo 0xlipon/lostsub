@@ -15,8 +15,6 @@ def print_banner():
                 \/            \/          \/ 
             
             			by @0xlipon with ❤
-            							v1
-
 
 	My Github Profile: 		https://github.com/0xlipon
 	My X Profile:			https://x.com/0xlipon
@@ -48,59 +46,52 @@ def gather_subdomains(domain):
         print("\033[34mERROR:\033[0m \033[31m Your VirusTotal API key is missing. Please replace 'your_virustotal_api_key_here' with your actual API key in the script.\033[0m")
         sys.exit(1)  # Exit the program
         
-    commands = [
-	(f'subdominator -d {domain} -o subdominator', "Collecting subdomains with Subdominator"),
+    api_commands = [
         (f'''curl --socks5 127.0.0.1:9050 -s "https://crt.sh/?q=%25.{domain}&output=json" | jq -r 'if type=="array" then . else empty end' | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u | anew crt''', "Collecting subdomains from crt.sh"),
         (f'''curl --socks5 127.0.0.1:9050 -s --request GET --url 'https://api.securitytrails.com/v1/domain/{domain}/subdomains?children_only=true&include_inactive=false' --header 'APIKEY: WGPKBLH-RODuVKrhDQ8WPb2HSgrKfaa8' --header 'accept: application/json' | jq -r '.subdomains[] | . + ".{domain}"' | anew securitytrails''', "Collecting subdomains from SecurityTrails"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://www.virustotal.com/api/v3/domains/{domain}/subdomains" -H "x-apikey: {VT_API_KEY}" | jq -r '.data[]?.attributes?.last_https_certificate?.extensions?.subject_alternative_name[]? // empty' | sort -u | anew virustotal''', "Collecting subdomains from VirusTotal"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.certspotter.com/v1/issuances?domain={domain}&include_subdomains=true&expand=dns_names" | jq -r '.[].dns_names[]' | sort -u | anew certspotter''', "Collecting subdomains from CertSpotter API"),
+        (f'''curl --socks5 127.0.0.1:9050 -s "http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=text&fl=original&collapse=urlkey" | sed -e 's_https*://__' -e 's/\\/.*//' | sort -u | anew webarchive''', "Collecting subdomains from Web Archive"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://jldc.me/anubis/subdomains/{domain}" | grep -Po '((http|https):\\/\\/)?([\\w.-]+\\.[\\w]+\\.[A-z]+)' | sort -u | anew jldc''', "Collecting subdomains from JLDC API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.hackertarget.com/hostsearch/?q={domain}" | awk -F',' '{{print $1}}' | anew hackertarget''', "Collecting subdomains from HackerTarget API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://otx.alienvault.com/api/v1/indicators/domain/tesla.com/url_list?limit=10000000000000000000000000000000000000000000000000000000000000000&page=1" | grep -o '"hostname": *"[^"]*' | sed 's/"hostname": "//' | sort -u | anew alienvault''', "Collecting subdomains from AlienVault API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.subdomain.center/?domain={domain}" | jq -r '.[]' | sort -u | anew subdomaincenter''', "Collecting subdomains from Subdomain Center API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://rapiddns.io/subdomain/{domain}?full=1" | grep -oE "[a-zA=Z0-9.-]+\\.{domain}" | sort -u | anew rapiddns''', "Collecting subdomains from RapidDNS API"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://graph.facebook.com/v9.0/{domain}/subdomains" | jq -r \'.data[]\' | sort -u > facebook.txt''', "Collecting subdomains from Facebook"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://bufferover.run/dns?q={domain}" | jq -r \'.[]\' | sort -u > bufferover.txt''', "Collecting subdomains from BufferOver"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://threatcrowd.org/searchApi/v2/domain/report/?domain={domain}" | jq -r \'.subdomains[]\' | sort -u > threatcrowd.txt''', "Collecting subdomains from ThreatCrowd"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://anubisdb.de/search/result/?query={domain}" | jq -r \'.[]\' | sort -u > anubisdb.txt''', "Collecting subdomains from AnubisDB"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://urlscan.io/api/v1/search/?q={domain}" | jq -r \'.results[].domain\' | sort -u > urlscan.txt''', "Collecting subdomains from Urlscan.io"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://api.threatminer.org/v2/domain.php?q={domain}&rt=5" | jq -r \'.results[].host\' | sort -u > threatminer.txt''', "Collecting subdomains from ThreatMiner"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "https://c99.nl/?q={domain}" | grep -oE "[a-zA-Z0-9.-]+\\.{domain}" | sort -u > c99.txt''', "Collecting subdomains from C99"),
-	(f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
-        (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
-        (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
-	(f'chaos -d {domain} -silent -o chaosdata', "Collecting subdomains from Chaos"),
-	(f'findomain -t {domain} -u -e > findomain_out', "Collecting subdomains from Findomain"),
-	(f'''curl --socks5 127.0.0.1:9050 -s "http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=text&fl=original&collapse=urlkey" | sed -e 's_https*://__' -e 's/\\/.*//' | sort -u | anew webarchive''', "Collecting subdomains from Web Archive"),
-	(f'dnsbruter -d {domain} -w subs-dnsbruter-small.txt -c 200 -wt 100 -o dnsbrute.txt -ws wild.txt', "Collecting subdomains with DNSBruter")
+        (f'''curl --socks5 127.0.0.1:9050 -s "https://subdomains.whoisxmlapi.com/api/v1?apiKey=at_bkkdj4Yz5yiUwMv578pmM0M6LqYZp&domainName=bbc.co.uk" | jq -r '.result.records[].domain' | anew whoisxmlapi''', "Collecting subdomains from Whois XML API")
     ]
     
-    for cmd, description in commands: # Use commands here instead of retry_commands
+    for cmd, description in api_commands: 
         run_command(cmd, description)
-    for command, description in commands:
-        print(description)  # Print the description of the command
-        os.system(command)  # Execute the command
-        time.sleep(3)  # Sleep for 3 seconds
+        
+    tool_commands = [
+        (f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
+        (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
+        (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
+        (f'subdominator -d {domain} -o subdominator', "Collecting subdomains with Subdominator")
+    ]
+    
+    for cmd, description in tool_commands: 
+        run_command(cmd, description)
 
 def filter_unique_subdomains(input_file, output_file):
     """Filter unique subdomains from the input file."""
     run_command(f"sort -u {input_file} > {output_file}", f"Filtering unique subdomains from {input_file}")
 
 def merge_subdomains():
-    # Combine all files and delete old ones
-    print("\033[34mINFO:\033[0m \033[31m Combining all subdomains...\033[0m")
-    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder traceninja virustotal securitytrails subdominator.txt dnsbrute.txt | sort -u > subdomain.txt", "Combining subdomains from various sources.")
-
-    # Filter unique subdomains
+    """Combine all the files and delete the old ones."""
+    print("\033[34mINFO:\033[0m \033[31m All subdomains are being merged....\033[0m")
+    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder traceninja virustotal securitytrails | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
+    
+    # Benzersiz subdomain'leri filtrele
     filter_unique_subdomains("subdomain.txt", "subdomains.txt")
     
-    # Delete subdomain.txt file
+    # subdomain.txt dosyasını sil
     if os.path.exists("subdomain.txt"):
         print("\033[34mINFO:\033[0m \033[31m subdomain.txt being deleted...\033[0m")
         run_command("rm subdomain.txt", "Deleting subdomain.txt")
-	    
-    # Delete other output files
-    files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "traceninja", "virustotal", "securitytrails", "subdominator.txt", "dnsbrute.txt", "dnsx.txt"]
+    
+    # Diğer çıktı dosyalarını sil
+    files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "traceninja", "virustotal", "securitytrails"]
     for file in files_to_remove:
         if os.path.exists(file):
             print(f"\033[34mINFO:\033[0m \033[31m {file} being deleted...\033[0m")
@@ -108,78 +99,10 @@ def merge_subdomains():
         else:
             print(f"\033[34mINFO:\033[0m \033[31m {file} not found, skipped deletion.\033[0m")
 
-def run_formatting(domain_name):
-    # Filtering ALIVE domain names
-    subprocess.run([
-        'subprober',
-        '-f', f'unique-{domain_name}-domains.txt',
-        '-sc', '-ar',
-        '-o', f'subprober-{domain_name}-domains.txt',
-        '-nc', '-mc', '200', '301', '302', '307', '308', '403',
-        '-c', '50'
-    ])
-
-    # Filtering valid domain names
-    with open(f'subprober-{domain_name}-domains.txt', 'r') as infile:
-        with open('output-domains.txt', 'w') as outfile:
-            for line in infile:
-                # grep -oP 'http[^\s]*'
-                matches = re.findall(r'http[^\s]*', line)
-                outfile.write('\n'.join(matches) + '\n')
-
-    # Removing old unique domain list
-    os.remove(f'unique-{domain_name}-domains.txt')
-
-    # Removing old subprober domains file
-    os.remove(f'subprober-{domain_name}-domains.txt')
-
-    # Renaming final output
-    os.rename('output-domains.txt', f'{domain_name}-domains.txt')
-
-    # Final filtering of unique domain names
-    seen = set()
-    with open(f'{domain_name}-domains.txt', 'r') as infile:
-        with open(f'final-{domain_name}-domains.txt', 'w') as outfile:
-            for line in infile:
-                # awk '{sub(/^https?:\/\//, "http://", $0); sub(/^www\./, "", $0); domain = $0; if (!seen[domain]++) print domain}'
-                domain = re.sub(r'^https?://', 'http://', line.strip())
-                domain = re.sub(r'^www\.', '', domain)
-                if domain not in seen:
-                    seen.add(domain)
-                    outfile.write(domain + '\n')
-
-    # Renaming final file to new file
-    os.rename(f'final-{domain_name}-domains.txt', f'{domain_name}-domains.txt')
-
-    print(f"Enumeration and filtering process completed successfully. Final output saved as {domain_name}-domains.txt")
-
-def filter_unique_subdomains(input_file, output_file):
-    # Filtering unique subdomains
-    seen = set()
-    with open(input_file, 'r') as infile:
-        with open(output_file, 'w') as outfile:
-            for line in infile:
-                subdomain = line.strip()
-                if subdomain and subdomain not in seen:
-                    seen.add(subdomain)
-                    outfile.write(subdomain + '\n')
-
-    # Start the process on subdomains
-    filter_unique_subdomains("subdomain.txt", "subdomains.txt")
-
-    # Run the formatting process on each subdomain in subdomains.txt
-def process_subdomains(file_path):
-    # Reading and processing subdomains from subdomains.txt
-    with open(file_path, 'r') as f:
-        subdomains = f.readlines()
-
-    for subdomain in subdomains:
-        subdomain = subdomain.strip()
-        if subdomain:  # Ensure the line is not empty
-            run_formatting(subdomain)
-
-    # Start processing subdomains
-    process_subdomains('subdomains.txt')
+def run_subfinder():
+    """Let's re-scan the subdomains we found with Subfinder."""
+    print("\033[34mINFO:\033[0m \033[32m Performing the final scan with Subfinder...\033[0m")
+    run_command("subfinder -dL subdomains.txt -all -recursive -o all.txt", "Final scan is being conducted with Subfinder")
 
 if __name__ == "__main__":
     # Print the banner
@@ -190,9 +113,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     domain = args.domain
-	
-    # Gather subdomains
+
+    # Gather the subdomains
     gather_subdomains(domain)
 
-    # Merge all subdomains
+    # Combine all subdomains
     merge_subdomains()
+
+    # Perform a scan with Subfinder
+    run_subfinder()
