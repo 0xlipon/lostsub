@@ -61,9 +61,8 @@ def gather_subdomains(domain):
         run_command(cmd, description)
         
     tool_commands = [
-        (f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
+        (f'subfinder -d {domain} -all -recursive -silent | anew subfinder', "Collecting subdomains from Subfinder"),
         (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
-        (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
         (f'subdominator -d {domain} -o subdominator', "Collecting subdomains with Subdominator")
     ]
     
@@ -77,7 +76,7 @@ def filter_unique_subdomains(input_file, output_file):
 def merge_subdomains():
     """Combine all the files and delete the old ones."""
     print("\033[34mINFO:\033[0m \033[31m All subdomains are being merged....\033[0m")
-    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder traceninja virustotal securitytrails | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
+    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder virustotal securitytrails | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
     
     # Benzersiz subdomain'leri filtrele
     filter_unique_subdomains("subdomain.txt", "subdomains.txt")
