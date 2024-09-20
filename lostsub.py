@@ -53,6 +53,7 @@ def gather_subdomains(domain):
         sys.exit(1)  # Exit the program
         
     commands = [
+	(f'subdominator -d {domain} -o output-subdominator.txt', "Collecting subdomains with Subdominator"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://crt.sh/?q=%25.{domain}&output=json" | jq -r 'if type=="array" then . else empty end' | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u | anew crt''', "Collecting subdomains from crt.sh"),
         (f'''curl --socks5 127.0.0.1:9050 -s --request GET --url 'https://api.securitytrails.com/v1/domain/{domain}/subdomains?children_only=true&include_inactive=false' --header 'APIKEY: WGPKBLH-RODuVKrhDQ8WPb2HSgrKfaa8' --header 'accept: application/json' | jq -r '.subdomains[] | . + ".{domain}"' | anew securitytrails''', "Collecting subdomains from SecurityTrails"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://www.virustotal.com/api/v3/domains/{domain}/subdomains" -H "x-apikey: {VT_API_KEY}" | jq -r '.data[]?.attributes?.last_https_certificate?.extensions?.subject_alternative_name[]? // empty' | sort -u | anew virustotal''', "Collecting subdomains from VirusTotal"),
@@ -70,7 +71,7 @@ def gather_subdomains(domain):
 	(f'''curl --socks5 127.0.0.1:9050 -s "https://urlscan.io/api/v1/search/?q={domain}" | jq -r \'.results[].domain\' | sort -u > urlscan.txt''', "Collecting subdomains from Urlscan.io"),
 	(f'''curl --socks5 127.0.0.1:9050 -s "https://api.threatminer.org/v2/domain.php?q={domain}&rt=5" | jq -r \'.results[].host\' | sort -u > threatminer.txt''', "Collecting subdomains from ThreatMiner"),
 	(f'''curl --socks5 127.0.0.1:9050 -s "https://c99.nl/?q={domain}" | grep -oE "[a-zA-Z0-9.-]+\\.{domain}" | sort -u > c99.txt''', "Collecting subdomains from C99"),
-        (f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
+	(f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
         (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
         (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
 	(f'chaos -d {domain} -silent -o chaos.txt', "Collecting subdomains from Chaos"),
