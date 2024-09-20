@@ -60,8 +60,6 @@ def main():
         result = check_tool(tool)
         print(f"{BOLD_WHITE}{tool.capitalize()}: {NC}{result}")
 
-    print(f"{BOLD_WHITE}Tmux:{NC} Tmux is installed (skipping check)")
-
     # Installation links
     print(f"\n{BOLD_CYAN}If you encounter any issues or are unable to run any of the tools,{NC}")
     print(f"{BOLD_WHITE}please refer to the following links for manual installation:{NC}")
@@ -100,7 +98,7 @@ def gather_subdomains(domain):
     
     time.sleep(3) # Short wait for Tor to start
     
-    VT_API_KEY = 'your_virustotal_api_key_here'
+    VT_API_KEY = '0cdaaea08e6982bd2149b417c570c692201347e22fae07d0e90e66cf849941f3'
 
     # Check if the API key is missing
     if VT_API_KEY == 'your_virustotal_api_key_here' or not VT_API_KEY.strip():
