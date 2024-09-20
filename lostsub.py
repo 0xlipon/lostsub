@@ -58,8 +58,8 @@ def gather_subdomains(domain):
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.subdomain.center/?domain={domain}" | jq -r '.[]' | sort -u | anew subdomaincenter''', "Collecting subdomains from Subdomain Center API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://rapiddns.io/subdomain/{domain}?full=1" | grep -oE "[a-zA=Z0-9.-]+\\.{domain}" | sort -u | anew rapiddns''', "Collecting subdomains from RapidDNS API"),
         (f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
-        (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder")
-        
+        (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
+	(f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja")
     ]
     
     for cmd, description in commands: 
@@ -72,7 +72,7 @@ def filter_unique_subdomains(input_file, output_file):
 def merge_subdomains():
     """Combine all the files and delete the old ones."""
     print("\033[34mINFO:\033[0m \033[31m All subdomains are being merged....\033[0m")
-    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder virustotal securitytrails | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
+    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder virustotal securitytrails traceninja | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
     
     # Filter unique subdomains
     filter_unique_subdomains("subdomain.txt", "subdomains.txt")
@@ -83,7 +83,7 @@ def merge_subdomains():
         run_command("rm subdomain.txt", "Deleting subdomain.txt")
     
     # Delete other output files
-    files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "virustotal", "securitytrails"]
+    files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "virustotal", "securitytrails", "traceninja"]
     for file in files_to_remove:
         if os.path.exists(file):
             print(f"\033[34mINFO:\033[0m \033[31m {file} being deleted...\033[0m")
