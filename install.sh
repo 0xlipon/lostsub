@@ -137,4 +137,14 @@ main() {
     print_summary
 }
 
+# Update package list and install Tor
+echo -e "\033[34mINFO:\033[0m \033[31m Installing Tor...\033[0m"
+sudo apt update && sudo apt install -y tor
+
+# Start the Tor service
+echo -e "\033[34mINFO:\033[0m \033[31m Starting Tor service...\033[0m"
+sudo service tor restart || sudo systemctl restart tor
+
+echo -e "\033[34mINFO:\033[0m \033[32m Tor has been successfully installed and started.\033[0m"
+
 main
