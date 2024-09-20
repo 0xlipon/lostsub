@@ -3,6 +3,7 @@ import argparse
 import time
 import subprocess
 import sys
+import re
 
 def print_banner():
     banner = r"""
@@ -22,6 +23,60 @@ def print_banner():
 	
     """
     print(banner)
+
+# Define color codes for output formatting
+BOLD_WHITE = '\033[1;37m'
+BOLD_CYAN = '\033[1;36m'
+NC = '\033[0m'  # No Color
+
+# List of tools to check
+tools = [
+    "dnsbruter",
+    "subdominator",
+    "curl",
+    "jq",
+    "anew",
+    "subfinder",
+    "assetfinder",
+    "traceninja",
+    "chaos",
+    "findomain",
+    "sublist3r"
+]
+
+def check_tool(tool):
+    """Check if a tool is installed and accessible."""
+    try:
+        # Check if the command is available
+        subprocess.run([tool, '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        return f"{tool.capitalize()} is installed."
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return f"{tool.capitalize()} is not installed correctly or not found."
+
+def main():
+    print(f"{BOLD_WHITE}Checking installed tools...{NC}")
+
+    for tool in tools:
+        result = check_tool(tool)
+        print(f"{BOLD_WHITE}{tool.capitalize()}: {NC}{result}")
+
+    print(f"{BOLD_WHITE}Tmux:{NC} Tmux is installed (skipping check)")
+
+    # Installation links
+    print(f"\n{BOLD_CYAN}If you encounter any issues or are unable to run any of the tools,{NC}")
+    print(f"{BOLD_WHITE}please refer to the following links for manual installation:{NC}")
+    print(f"{BOLD_WHITE}Dnsbruter:{NC} https://github.com/RevoltSecurities/Dnsbruter")
+    print(f"{BOLD_WHITE}Subdominator:{NC} https://github.com/RevoltSecurities/Subdominator")
+    print(f"{BOLD_WHITE}Subfinder:{NC} https://github.com/projectdiscovery/subfinder")
+    print(f"{BOLD_WHITE}Assetfinder:{NC} https://github.com/tomnomnom/assetfinder")
+    print(f"{BOLD_WHITE}Chaos:{NC} https://github.com/projectdiscovery/chaos")
+    print(f"{BOLD_WHITE}Findomain:{NC} https://github.com/Findomain/Findomain")
+    print(f"{BOLD_WHITE}Sublist3r:{NC} https://github.com/aboehme/Sublist3r")
+    print(f"{BOLD_WHITE}Traceninja:{NC} https://github.com/robertdavidgraham/traceninja")
+    print(f"{BOLD_WHITE}JQ:{NC} https://stedolan.github.io/jq/")
+    print(f"{BOLD_WHITE}Anew:{NC} https://github.com/tomnomnom/anew")
+
+    print("All checks completed.")
 
 def run_command(command, description, retries=3, delay=5):
     """Run the command and if you encounter an error, try again"""
@@ -76,8 +131,8 @@ def gather_subdomains(domain):
         (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
 	(f'chaos -d {domain} -silent -o chaos.txt', "Collecting subdomains from Chaos"),
 	(f'findomain -t {domain} -u -e', "Collecting subdomains from Findomain"),
-	(f'sublist3r -d {domain} -o sublist3r.txt', "Collecting subdomains with Sublist3r")
-	(f'dnsx -d {domain} -silent -w dns_worldlist.txt -o dnsx.txt', "Collecting subdomains using DNSX"),
+	(f'sublist3r -d {domain} -o sublist3r.txt', "Collecting subdomains with Sublist3r"),
+	(f'dnsbruter -d {domain} -w subs-dnsbruter-small.txt -c 200 -wt 100 -o dnsbrute.txt -ws wild.txt', "Collecting subdomains with DNSBruter")
     ]
     
     for cmd, description in commands: # Use commands here instead of retry_commands
@@ -91,9 +146,9 @@ def filter_unique_subdomains(input_file, output_file):
     run_command(f"sort -u {input_file} > {output_file}", f"Filtering unique subdomains from {input_file}")
 
 def merge_subdomains():
-    """Tüm dosyaları birleştir ve eski dosyaları sil"""
-    print("\033[34mINFO:\033[0m \033[31m Tüm subdomain'ler birleştiriliyor...\033[0m")
-    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder traceninja virustotal securitytrails | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
+    # Combine all files and delete old ones
+    print("\033[34mINFO:\033[0m \033[31m Combining all subdomains...\033[0m")
+    run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder traceninja virustotal securitytrails subdominator.txt dnsbrute.txt | sort -u > subdomain.txt", "Combining subdomains from various sources.")
 
     # Filter unique subdomains
     filter_unique_subdomains("subdomain.txt", "subdomains.txt")
@@ -104,7 +159,7 @@ def merge_subdomains():
         run_command("rm subdomain.txt", "Deleting subdomain.txt")
 	    
     # Delete other output files
-    files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "traceninja", "virustotal", "securitytrails"]
+    files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "traceninja", "virustotal", "securitytrails", "subdominator.txt", "dnsbrute.txt", "dnsx.txt"]
     for file in files_to_remove:
         if os.path.exists(file):
             print(f"\033[34mINFO:\033[0m \033[31m {file} being deleted...\033[0m")
@@ -112,10 +167,78 @@ def merge_subdomains():
         else:
             print(f"\033[34mINFO:\033[0m \033[31m {file} not found, skipped deletion.\033[0m")
 
-def run_subfinder():
-    """Let's re-scan the subdomains we found with Subfinder."""
-    print("\033[34mINFO:\033[0m \033[32m Performing the final scan with Subfinder...\033[0m")
-    run_command("subfinder -dL subdomains.txt -all -recursive -o all.txt", "Final scan is being conducted with Subfinder")
+def run_formatting(domain_name):
+    # Filtering ALIVE domain names
+    subprocess.run([
+        'subprober',
+        '-f', f'unique-{domain_name}-domains.txt',
+        '-sc', '-ar',
+        '-o', f'subprober-{domain_name}-domains.txt',
+        '-nc', '-mc', '200', '301', '302', '307', '308', '403',
+        '-c', '50'
+    ])
+
+    # Filtering valid domain names
+    with open(f'subprober-{domain_name}-domains.txt', 'r') as infile:
+        with open('output-domains.txt', 'w') as outfile:
+            for line in infile:
+                # grep -oP 'http[^\s]*'
+                matches = re.findall(r'http[^\s]*', line)
+                outfile.write('\n'.join(matches) + '\n')
+
+    # Removing old unique domain list
+    os.remove(f'unique-{domain_name}-domains.txt')
+
+    # Removing old subprober domains file
+    os.remove(f'subprober-{domain_name}-domains.txt')
+
+    # Renaming final output
+    os.rename('output-domains.txt', f'{domain_name}-domains.txt')
+
+    # Final filtering of unique domain names
+    seen = set()
+    with open(f'{domain_name}-domains.txt', 'r') as infile:
+        with open(f'final-{domain_name}-domains.txt', 'w') as outfile:
+            for line in infile:
+                # awk '{sub(/^https?:\/\//, "http://", $0); sub(/^www\./, "", $0); domain = $0; if (!seen[domain]++) print domain}'
+                domain = re.sub(r'^https?://', 'http://', line.strip())
+                domain = re.sub(r'^www\.', '', domain)
+                if domain not in seen:
+                    seen.add(domain)
+                    outfile.write(domain + '\n')
+
+    # Renaming final file to new file
+    os.rename(f'final-{domain_name}-domains.txt', f'{domain_name}-domains.txt')
+
+    print(f"Enumeration and filtering process completed successfully. Final output saved as {domain_name}-domains.txt")
+
+def filter_unique_subdomains(input_file, output_file):
+    # Filtering unique subdomains
+    seen = set()
+    with open(input_file, 'r') as infile:
+        with open(output_file, 'w') as outfile:
+            for line in infile:
+                subdomain = line.strip()
+                if subdomain and subdomain not in seen:
+                    seen.add(subdomain)
+                    outfile.write(subdomain + '\n')
+
+    # Start the process on subdomains
+    filter_unique_subdomains("subdomain.txt", "subdomains.txt")
+
+    # Run the formatting process on each subdomain in subdomains.txt
+def process_subdomains(file_path):
+    # Reading and processing subdomains from subdomains.txt
+    with open(file_path, 'r') as f:
+        subdomains = f.readlines()
+
+    for subdomain in subdomains:
+        subdomain = subdomain.strip()
+        if subdomain:  # Ensure the line is not empty
+            run_formatting(subdomain)
+
+    # Start processing subdomains
+    process_subdomains('subdomains.txt')
 
 if __name__ == "__main__":
     # Print the banner
@@ -132,6 +255,3 @@ if __name__ == "__main__":
 
     # Merge all subdomains
     merge_subdomains()
-
-    # Scan with Subfinder
-    run_subfinder()
