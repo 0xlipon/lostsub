@@ -135,6 +135,6 @@ main() {
     echo -e "${BOLD_WHITE}Findomain:${NC} https://github.com/Findomain/Findomain"
 
     print_summary
-"}
+}
 
 main
