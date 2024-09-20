@@ -40,11 +40,6 @@ def run_command(command, description, retries=3, delay=5):
 
 def gather_subdomains(domain):
     """Collecting subdomains with various tools"""
-	
-    print("\033[34mINFO:\033[0m \033[31m Starting Tor service...\033[0m")
-    os.system("sudo service tor restart || sudo systemctl restart tor")  # Tor service start
-    
-    time.sleep(3) # Short wait for Tor to start
     
     VT_API_KEY = '0cdaaea08e6982bd2149b417c570c692201347e22fae07d0e90e66cf849941f3'
 
@@ -83,9 +78,6 @@ def gather_subdomains(domain):
     
     for cmd, description in commands: # Use commands here instead of retry_commands
         run_command(cmd, description)
-        
-    print("\033[34mINFO:\033[0m \033[31m Stopping Tor service...\033[0m")
-    os.system("sudo systemctl stop tor")  # Stop the Tor service
 
 def filter_unique_subdomains(input_file, output_file):
     """Filter unique subdomains from the input file."""
