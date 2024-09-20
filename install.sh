@@ -147,4 +147,7 @@ sudo service tor restart || sudo systemctl restart tor
 
 echo -e "\033[34mINFO:\033[0m \033[32m Tor has been successfully installed and started.\033[0m"
 
+# Download wordlists
+wget https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Discovery/DNS/subdomains-top1million-5000.txt
+
 main
