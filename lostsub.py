@@ -39,6 +39,9 @@ def run_command(command, description, retries=3, delay=5):
 
 def gather_subdomains(domain):
     """Collecting subdomains with various tools"""
+	
+    print("\033[34mINFO:\033[0m \033[31m Starting Tor service...\033[0m")
+    os.system("sudo systemctl restart tor")  # Tor service start
     
     time.sleep(3)
     
@@ -46,7 +49,7 @@ def gather_subdomains(domain):
     
     if VT_API_KEY == 'your_virustotal_api_key_here' or not VT_API_KEY.strip():
         print("\033[34mERROR:\033[0m \033[31m Your VirusTotal API key is missing. Please replace 'your_virustotal_api_key_here' with your actual API key in the script.\033[0m")
-        sys.exit(1)  # Programdan çıkış yap
+        sys.exit(1)  # Exit the program
         
     commands = [
         (f'''curl --socks5 127.0.0.1:9050 -s "https://crt.sh/?q=%25.{domain}&output=json" | jq -r 'if type=="array" then . else empty end' | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u | anew crt''', "Collecting subdomains from crt.sh"),
@@ -68,7 +71,7 @@ def gather_subdomains(domain):
         run_command(cmd, description)
         
     print("\033[34mINFO:\033[0m \033[31m Stopping Tor service...\033[0m")
-    os.system("sudo systemctl stop tor")  # Tor servisini durdur
+    os.system("sudo systemctl stop tor")  # Stop the Tor service
 
 def filter_unique_subdomains(input_file, output_file):
     """Filter unique subdomains from the input file."""
