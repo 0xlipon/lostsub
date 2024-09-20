@@ -24,58 +24,6 @@ def print_banner():
     """
     print(banner)
 
-# Define color codes for output formatting
-BOLD_WHITE = '\033[1;37m'
-BOLD_CYAN = '\033[1;36m'
-NC = '\033[0m'  # No Color
-
-# List of tools to check
-tools = [
-    "dnsbruter",
-    "subdominator",
-    "curl",
-    "jq",
-    "anew",
-    "subfinder",
-    "assetfinder",
-    "traceninja",
-    "chaos",
-    "findomain",
-    "sublist3r"
-]
-
-def check_tool(tool):
-    """Check if a tool is installed and accessible."""
-    try:
-        # Check if the command is available
-        subprocess.run([tool, '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        return f"{tool.capitalize()} is installed."
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return f"{tool.capitalize()} is not installed correctly or not found."
-
-def main():
-    print(f"{BOLD_WHITE}Checking installed tools...{NC}")
-
-    for tool in tools:
-        result = check_tool(tool)
-        print(f"{BOLD_WHITE}{tool.capitalize()}: {NC}{result}")
-
-    # Installation links
-    print(f"\n{BOLD_CYAN}If you encounter any issues or are unable to run any of the tools,{NC}")
-    print(f"{BOLD_WHITE}please refer to the following links for manual installation:{NC}")
-    print(f"{BOLD_WHITE}Dnsbruter:{NC} https://github.com/RevoltSecurities/Dnsbruter")
-    print(f"{BOLD_WHITE}Subdominator:{NC} https://github.com/RevoltSecurities/Subdominator")
-    print(f"{BOLD_WHITE}Subfinder:{NC} https://github.com/projectdiscovery/subfinder")
-    print(f"{BOLD_WHITE}Assetfinder:{NC} https://github.com/tomnomnom/assetfinder")
-    print(f"{BOLD_WHITE}Chaos:{NC} https://github.com/projectdiscovery/chaos")
-    print(f"{BOLD_WHITE}Findomain:{NC} https://github.com/Findomain/Findomain")
-    print(f"{BOLD_WHITE}Sublist3r:{NC} https://github.com/aboehme/Sublist3r")
-    print(f"{BOLD_WHITE}Traceninja:{NC} https://github.com/robertdavidgraham/traceninja")
-    print(f"{BOLD_WHITE}JQ:{NC} https://stedolan.github.io/jq/")
-    print(f"{BOLD_WHITE}Anew:{NC} https://github.com/tomnomnom/anew")
-
-    print("All checks completed.")
-
 def run_command(command, description, retries=3, delay=5):
     """Run the command and if you encounter an error, try again"""
     attempt = 0
