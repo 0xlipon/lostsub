@@ -40,10 +40,7 @@ def run_command(command, description, retries=3, delay=5):
 def gather_subdomains(domain):
     """Collecting subdomains with various tools"""
     
-    print("\033[34mINFO:\033[0m \033[31m Starting Tor service...\033[0m")
-    os.system("sudo systemctl restart tor")  # Tor servisini başlat
-    
-    time.sleep(5)
+    time.sleep(3)
     
     VT_API_KEY = 'your_virustotal_api_key_here'
     
