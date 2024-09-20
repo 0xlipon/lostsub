@@ -70,8 +70,8 @@ If you encounter "Your VirusTotal API key is missing," edit the lostsub.py file 
 - [**Anew:**](https://github.com/tomnomnom/anew) Tool for deduplicating results. *(optional)*
 
 
-## 🔗 Links
-[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://github.com/0xlipon)
+## 🙏 Support on KoFi:
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/0xlipon)
 
 ## Conclusion
 
