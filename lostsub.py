@@ -42,7 +42,7 @@ def gather_subdomains(domain):
     """Collecting subdomains with various tools"""
 	
     print("\033[34mINFO:\033[0m \033[31m Starting Tor service...\033[0m")
-    os.system("sudo systemctl restart tor")  # Tor service start
+    os.system("sudo service tor restart || sudo systemctl restart tor")  # Tor service start
     
     time.sleep(3) # Short wait for Tor to start
     
