@@ -43,10 +43,11 @@ def gather_subdomains(domain):
     print("\033[34mINFO:\033[0m \033[31m Starting Tor service...\033[0m")
     os.system("sudo systemctl restart tor")  # Tor service start
     
-    time.sleep(3)
+    time.sleep(3) # Short wait for Tor to start
     
     VT_API_KEY = 'your_virustotal_api_key_here'
-    
+
+    # Check if the API key is missing
     if VT_API_KEY == 'your_virustotal_api_key_here' or not VT_API_KEY.strip():
         print("\033[34mERROR:\033[0m \033[31m Your VirusTotal API key is missing. Please replace 'your_virustotal_api_key_here' with your actual API key in the script.\033[0m")
         sys.exit(1)  # Exit the program
@@ -67,7 +68,7 @@ def gather_subdomains(domain):
         (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja")
     ]
     
-    for cmd, description in commands:
+    for cmd, description in commands: # Use commands here instead of retry_commands
         run_command(cmd, description)
         
     print("\033[34mINFO:\033[0m \033[31m Stopping Tor service...\033[0m")
@@ -81,13 +82,16 @@ def merge_subdomains():
     """Tüm dosyaları birleştir ve eski dosyaları sil"""
     print("\033[34mINFO:\033[0m \033[31m Tüm subdomain'ler birleştiriliyor...\033[0m")
     run_command("cat crt certspotter webarchive jldc hackertarget alienvault subdomaincenter rapiddns subfinder assetfinder traceninja virustotal securitytrails | sort -u > subdomain.txt", "Çeşitli kaynaklardan subdomain'leri birleştiriyor")
-    
+
+    # Filter unique subdomains
     filter_unique_subdomains("subdomain.txt", "subdomains.txt")
     
+    # Delete subdomain.txt file
     if os.path.exists("subdomain.txt"):
         print("\033[34mINFO:\033[0m \033[31m subdomain.txt being deleted...\033[0m")
         run_command("rm subdomain.txt", "Deleting subdomain.txt")
-    
+	    
+    # Delete other output files
     files_to_remove = ["crt", "certspotter", "webarchive", "jldc", "hackertarget", "alienvault", "subdomaincenter", "rapiddns", "subfinder", "assetfinder", "traceninja", "virustotal", "securitytrails"]
     for file in files_to_remove:
         if os.path.exists(file):
@@ -102,6 +106,7 @@ def run_subfinder():
     run_command("subfinder -dL subdomains.txt -all -recursive -o all.txt", "Final scan is being conducted with Subfinder")
 
 if __name__ == "__main__":
+    # Print the banner
     print_banner()
 
     parser = argparse.ArgumentParser(description="Subdomain Enumeration Script")
@@ -109,9 +114,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     domain = args.domain
-
+	
+    # Gather subdomains
     gather_subdomains(domain)
 
+    # Merge all subdomains
     merge_subdomains()
 
+    # Scan with Subfinder
     run_subfinder()
