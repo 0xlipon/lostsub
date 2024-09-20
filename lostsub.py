@@ -63,9 +63,20 @@ def gather_subdomains(domain):
         (f'''curl --socks5 127.0.0.1:9050 -s "https://otx.alienvault.com/api/v1/indicators/domain/tesla.com/url_list?limit=10000000000000000000000000000000000000000000000000000000000000000&page=1" | grep -o '"hostname": *"[^"]*' | sed 's/"hostname": "//' | sort -u | anew alienvault''', "Collecting subdomains from AlienVault API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://api.subdomain.center/?domain={domain}" | jq -r '.[]' | sort -u | anew subdomaincenter''', "Collecting subdomains from Subdomain Center API"),
         (f'''curl --socks5 127.0.0.1:9050 -s "https://rapiddns.io/subdomain/{domain}?full=1" | grep -oE "[a-zA=Z0-9.-]+\\.{domain}" | sort -u | anew rapiddns''', "Collecting subdomains from RapidDNS API"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://graph.facebook.com/v9.0/{domain}/subdomains" | jq -r \'.data[]\' | sort -u > facebook.txt''', "Collecting subdomains from Facebook"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://bufferover.run/dns?q={domain}" | jq -r \'.[]\' | sort -u > bufferover.txt''', "Collecting subdomains from BufferOver"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://threatcrowd.org/searchApi/v2/domain/report/?domain={domain}" | jq -r \'.subdomains[]\' | sort -u > threatcrowd.txt''', "Collecting subdomains from ThreatCrowd"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://anubisdb.de/search/result/?query={domain}" | jq -r \'.[]\' | sort -u > anubisdb.txt''', "Collecting subdomains from AnubisDB"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://urlscan.io/api/v1/search/?q={domain}" | jq -r \'.results[].domain\' | sort -u > urlscan.txt''', "Collecting subdomains from Urlscan.io"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://api.threatminer.org/v2/domain.php?q={domain}&rt=5" | jq -r \'.results[].host\' | sort -u > threatminer.txt''', "Collecting subdomains from ThreatMiner"),
+	(f'''curl --socks5 127.0.0.1:9050 -s "https://c99.nl/?q={domain}" | grep -oE "[a-zA-Z0-9.-]+\\.{domain}" | sort -u > c99.txt''', "Collecting subdomains from C99"),
         (f'subfinder -d {domain} -all -recursive | anew subfinder', "Collecting subdomains from Subfinder"),
         (f'assetfinder -subs-only {domain} | tee assetfinder', "Collecting subdomains from Assetfinder"),
-        (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja")
+        (f'traceninja -d {domain} -o traceninja', "Collecting subdomains from TraceNinja"),
+	(f'chaos -d {domain} -silent -o chaos.txt', "Collecting subdomains from Chaos"),
+	(f'findomain -t {domain} -u -e', "Collecting subdomains from Findomain"),
+	(f'sublist3r -d {domain} -o sublist3r.txt', "Collecting subdomains with Sublist3r")
+	(f'dnsx -d {domain} -silent -w dns_worldlist.txt -o dnsx.txt', "Collecting subdomains using DNSX"),
     ]
     
     for cmd, description in commands: # Use commands here instead of retry_commands
