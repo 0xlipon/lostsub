@@ -16,6 +16,7 @@ tools=(
     "assetfinder"
     "chaos"
     "findomain"
+    "TraceNinja"
 )
 
 # Associative array to keep track of installation status
@@ -98,6 +99,23 @@ install_tool() {
             }
             rm findomain-linux.zip
             ;;
+
+        "TraceNinja")
+            git clone https://github.com/mohdh34m/TraceNinja.git && {
+            cd TraceNinja
+            pip install -r requirements.txt && {
+                echo "$1 installed successfully."
+                installation_status["$1"]="installed"
+            } || {
+                echo "Installing requirements for TraceNinja failed."
+                installation_status["$1"]="failed"
+        }
+    } || {
+        echo "Cloning TraceNinja failed."
+        installation_status["$1"]="failed"
+    }
+    ;;
+
         *)
             echo -e "${BOLD_CYAN}Unknown tool: $1${NC}"
             installation_status["$1"]="unknown"
@@ -148,6 +166,7 @@ sudo service tor restart || sudo systemctl restart tor
 echo -e "\033[34mINFO:\033[0m \033[32m Tor has been successfully installed and started.\033[0m"
 
 # Download wordlists
+echo -e "\033[34mINFO:\033[0m \033[31m Downloading Wordlist...\033[0m"
 wget https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Discovery/DNS/subdomains-top1million-5000.txt
 
 main
